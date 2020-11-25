@@ -1,0 +1,9 @@
+config.cfg
+data/
+parquet/
+_pycache_/
+.vscode/
+.ipynb_checkpoints/
+.env
+Untitled.ipynb
+tables.md
