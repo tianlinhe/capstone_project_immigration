@@ -195,10 +195,11 @@ The data will be updated monthly, because the immigration data is available at a
 
 ### Write a description of how you would approach the problem differently under the following scenarios:
 
-* The data was increased by 100x.
+#### The data was increased by 100x.
 It is still possible to use AWS due to its horizontal scalability, though we can consider rent a cluster with more worker nodes.
 
-* The data populates a dashboard that must be updated on a daily basis by 7am every day.
+#### The data populates a dashboard that must be updated on a daily basis by 7am every day.
 *Apache Airflow* can be used to schedule, trigger, and visualise data pipelines at a regular interval
-* The database needed to be accessed by 100+ people.
+
+#### The database needed to be accessed by 100+ people.
 We will need to define new AWS access roles, to grant aws users access to data in S3.
