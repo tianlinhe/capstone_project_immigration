@@ -92,3 +92,30 @@ def clean_spark(df,dropna_mode,idx):
     print ('df.count after dropping duplicated rows', df.count())
     
     return df
+
+
+def qc_parquet(table, spark, input1,key):
+    """read parquets of fact and dimension tables and count if nrows==0
+    :param table: a string, name of the parquet folder
+    :param spark: spark session
+    :param input1: a string, path of parquet files to read
+    :param key: a string of a given key supposed to be non-nan
+    """
+    df=spark.read.parquet(input1)
+    nrows = df.count()
+
+    # check if number of records equals 0
+    if nrows == 0:
+        print(f"Data QC failed for {table} with 0 records!")
+    else:
+        print(f"Data QC passed for {table} with {nrows} records.")
+
+    # 2. count number of nan rows in a given
+    count_nan=df.where(col(key).isNull()).count()
+    if count_nan==0:
+        print(f"Data QC passed for {table} with 0 nan rows at key {key}!")
+    else:
+        print(f"Data QC failed for {table} with {count_nan} nan rows at key {key}!")
+    
+    print (f"QC of table {table} completed")
+    

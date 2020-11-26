@@ -124,3 +124,81 @@ The fact table `fact_immigration` is created from the immigration data. It inclu
 | i94_visa_info | string         |      | description of 'i94_visa'                                    |
 | ...           | ...            | ...  | ...                                                          |
 
+## Queries to run
+
+SQL queries can be run on the created tables to answer the following questions we asked:
+
+* Where did the immigrants come from? A cold place or a hot place?
+
+	Join **fact table** amd **dim_temp** via `country_code` to obtain the every April temperature from the country where the immigrate comes from
+
+* What were the purposes of immigration? What kind of visa did they hold?
+
+	Join **fact table** and **dim_visa** and aggregate on `i94_visa_type` to differentiate if the immigrant has bussiness, study and leisure purpose
+
+* What were their favourite immigration destination(s)?
+
+	Aggregate the fact table at state-level via column `i94_addr`
+
+* Are there anything special (attitude, composition of the population) about these destinations?
+
+	* Attitude of the destination can be obtained by joining **fact table** and **dim_table** via `local_code` of the airport, which gives attitude of the airport
+	* Join **fact table** and **dim_demographics** via `State_code` to obtain demographical information about the destination state. One can further aggregate at different level (e.g. race, city) to find out the related information
+
+	
+
+# Data Quality Checks
+
+### Integrity constraints on the relational database (e.g., unique key, data type, etc.)
+
+`funcs.clean_spark()` was run for every table to make sure a table has correct unique key definition and non-redundant unique rows;
+
+### Unit tests for the scripts to ensure they are doing the right thing
+
+A local test is designed to run on immigration data in April only, before the actual run on AWS. Just run `etl.py` in local mode. 
+
+```bash
+$python etl.py local
+```
+
+### Source/Count checks to ensure completeness
+
+In `qc_parquet` in `funcs.py` checks the parquet files generated from ETL pipeline for
+
+	* The number of records in each table
+	* The number of nan records of the primary key of each table
+
+```python
+data='parquet/'
+tbl_key={'dim_airport':'local_code',
+        'dim_temp':'country_code',
+        'dim_demographics':'State_Code',
+        'dim_visa':'visatype',
+        'fact_immigration':'cicid'
+        }
+for i in tbl_key:
+    print (i, tbl_key[i])
+    funcs.qc_parquet(i,spark,data+i,tbl_key[i])
+```
+
+Optionally, the quality checks can be incorporated in ETL pipeline.
+
+# Project Write-up
+
+### Clearly state the rationale for the choice of tools and technologies for the project.
+
+*Apache Spark* was chosen because of it ability to handle multiple file formats (sas, csv, parquets). It is also optimised for cluster computing on AWS.
+
+### Propose how often the data should be updated and why.
+
+The data will be updated monthly, because the immigration data is available at a monthly manner
+
+### Write a description of how you would approach the problem differently under the following scenarios:
+
+* The data was increased by 100x.
+It is still possible to use AWS due to its horizontal scalability, though we can consider rent a cluster with more worker nodes.
+
+* The data populates a dashboard that must be updated on a daily basis by 7am every day.
+*Apache Airflow* can be used to schedule, trigger, and visualise data pipelines at a regular interval
+* The database needed to be accessed by 100+ people.
+We will need to define new AWS access roles, to grant aws users access to data in S3.

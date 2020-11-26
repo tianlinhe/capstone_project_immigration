@@ -154,8 +154,8 @@ def process_immigration(table1,table2,spark,input1,output1):
 
     """
 
-    print ('fact table',table1)
-    print ('dim table',table2)
+    print ('table',table1)
+    print ('table',table2)
     # read spark
     df=spark.read.format('com.github.saurfang.sas.spark').load(input1)
     
@@ -215,10 +215,10 @@ def main(mode):
     #process_temp('dim_temp',spark,data_in+data_temp,data_in+i94des,data_out)
 
     data_demographics='us-cities-demographics.csv'
-    #process_demographics('df_demographics',spark, data_in+data_demographics,data_out)
+    process_demographics('dim_demographics',spark, data_in+data_demographics,data_out)
 
     
-    process_immigration(table1='demographics',table2='visa',spark=spark,input1=data_in+data_immigration,output1=data_out)
+    process_immigration(table1='fact_immigration',table2='dim_visa',spark=spark,input1=data_in+data_immigration,output1=data_out)
 
       
     
